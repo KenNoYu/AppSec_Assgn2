@@ -1,0 +1,186 @@
+﻿@page
+@model WebApplication1.Pages.RegisterModel
+@{
+}
+
+<div class="container mt-5">
+
+	<div class="row justify-content-center align-items-center">
+
+		<div class="col-sm-12 col-md-12 col-lg-4">
+			<h1 class="mb-3">Register </h1>
+
+            <form method="post" enctype="multipart/form-data">
+				<div asp-validation-summary="All" class="text-danger"></div>
+
+				<!-- First Name -->
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.FirstName">First Name</label>
+					<input type="Text" asp-for="RModel.FirstName" class="form-control" />
+					<span asp-validaton-for="RModel.FirstName" class="text-danger"></span>
+				</div>
+
+				<!-- Last Name -->
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.LastName">Last Name</label>
+					<input type="Text" asp-for="RModel.LastName" class="form-control" />
+					<span asp-validaton-for="RModel.LastName" class="text-danger"></span>
+				</div>
+
+				<!-- Gender -->
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.Gender">Gender</label>
+					<select asp-for="RModel.Gender" class="form-select">
+						<option value="">Select Gender</option>
+						<option value="Male">Male</option>
+						<option value="Female">Female</option>
+						<option value="Other">Other</option>
+					</select>
+					<span asp-validation-for="RModel.Gender" class="text-danger"></span>
+				</div>
+
+				<!-- NRIC -->
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.NRIC">NRIC</label>
+					<input type="text" asp-for="RModel.NRIC" class="form-control" />
+					<span asp-validation-for="RModel.NRIC" class="text-danger"></span>
+				</div>
+
+				<!-- Email -->
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.Email">Email Address</label>
+					<input type="Text" asp-for="RModel.Email" class="form-control" />
+					<span asp-validaton-for="RModel.Email" class="text-danger"></span>
+				</div>
+
+				<!-- Password -->
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.Password">Password</label>
+                    <input type="password" asp-for="RModel.Password" class="form-control" id="Password" />
+					<span asp-validaton-for="RModel.Password" class="text-danger"></span>
+                    <span id="passwordFeedback"></span>
+                    <div id="passwordScore" class="mt-1"></div>
+				</div>
+
+				<!-- Confirm Password -->
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.ConfirmPassword">Confirm Password</label>
+                    <input type="password" asp-for="RModel.ConfirmPassword" class="form-control" id="ConfirmPassword" />
+					<span asp-validaton-for="RModel.ConfirmPassword" class="text-danger"></span>
+                    <span id="confirmPasswordFeedback" class="text-danger"></span>
+				</div>
+
+                <!-- Date of Birth -->
+                <div class="mb-3">
+                    <label class="form-label" asp-for="RModel.DateOfBirth">Date of Birth</label>
+                    <input type="date" asp-for="RModel.DateOfBirth" class="form-control" />
+                    <span asp-validation-for="RModel.DateOfBirth" class="text-danger"></span>
+                </div>
+
+                <!-- Resume Upload -->
+                <div class="mb-3">
+                    <label class="form-label" asp-for="RModel.Resume">Resume (.docx or .pdf)</label>
+                    <input type="file" asp-for="RModel.Resume" class="form-control" accept=".docx,.pdf" />
+                    <span asp-validation-for="RModel.Resume" class="text-danger"></span>
+                </div>
+
+                <!-- Who Am I -->
+                <div class="mb-3">
+                    <label class="form-label" asp-for="RModel.WhoAmI">Who Am I</label>
+                    <textarea asp-for="RModel.WhoAmI" class="form-control"></textarea>
+                    <span asp-validation-for="RModel.WhoAmI" class="text-danger"></span>
+                </div>
+
+				<div class="mb-3">
+					<button type="submit" class="btn btn-primary">Register</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const passwordInput = document.getElementById("Password");
+        const confirmPasswordInput = document.getElementById("ConfirmPassword");
+        const passwordFeedback = document.getElementById("passwordFeedback");
+        const confirmPasswordFeedback = document.getElementById("confirmPasswordFeedback");
+        const passwordScoreDiv = document.getElementById("passwordScore");
+        const form = document.getElementById("registerForm");
+
+        // Function to calculate password score
+        function calculatePasswordScore(password) {
+            let score = 0;
+
+            if (password.length >= 8) score++; // Very Weak
+            if (/[a-z]/.test(password)) score++; // Weak
+            if (/[A-Z]/.test(password)) score++; // Medium
+            if (/\d/.test(password)) score++; // Strong
+            if (/[!@@#$%^&*(),.?":{}|<>]/.test(password)) score++; // Excellent
+
+            return score;
+        }
+
+        // Function to display password score and feedback
+        function displayPasswordScore(score) {
+            const feedback = [
+                "Complexity: Very Weak",
+                "Complexity: Weak",
+                "Complexity: Medium",
+                "Complexity: Strong",
+                "Complexity: Excellent",
+            ];
+
+            let feedbackText = feedback[score - 1] || "Complexity: Very Weak";
+            let color = "red";
+
+            if (score === 2) color = "orange";
+            if (score === 3) color = "blue";
+            if (score === 4) color = "green";
+            if (score === 5) color = "darkgreen";
+
+            passwordScoreDiv.textContent = feedbackText;
+            passwordScoreDiv.style.color = color;
+        }
+
+        passwordInput.addEventListener("input", () => {
+            const password = passwordInput.value;
+            const score = calculatePasswordScore(password);
+
+            if (score < 5) {
+                passwordFeedback.textContent = "Password must meet all complexity requirements.";
+                passwordFeedback.style.color = "red";
+            } else {
+                passwordFeedback.textContent = "";
+            }
+
+            displayPasswordScore(score);
+        });
+
+        confirmPasswordInput.addEventListener("input", () => {
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (confirmPassword !== passwordInput.value) {
+                confirmPasswordFeedback.textContent = "Passwords do not match.";
+            } else {
+                confirmPasswordFeedback.textContent = "";
+            }
+        });
+
+        // Prevent form submission if passwords are invalid
+        form.addEventListener("submit", (e) => {
+            const password = passwordInput.value;
+            const score = calculatePasswordScore(password);
+
+            if (score < 5) {
+                e.preventDefault();
+                passwordFeedback.textContent = "Please enter a valid strong password.";
+            }
+
+            if (confirmPasswordInput.value !== passwordInput.value) {
+                e.preventDefault();
+                confirmPasswordFeedback.textContent = "Passwords do not match.";
+            }
+        });
+    });
+</script>
