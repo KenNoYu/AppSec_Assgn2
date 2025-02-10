@@ -9,13 +9,13 @@ namespace WebApplication1.Pages
 {
     public class RegisterModel : PageModel
     {
-        private UserManager<IdentityUser> userManager { get; }
-        private SignInManager<IdentityUser> signInManager { get; }
+        private UserManager<ApplicationUser> userManager { get; }
+        private SignInManager<ApplicationUser> signInManager { get; }
 
         [BindProperty]
         public Register RModel { get; set; }
 
-        public RegisterModel(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        public RegisterModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             this.userManager = userManager; this.signInManager = signInManager;
         }
@@ -41,14 +41,14 @@ namespace WebApplication1.Pages
 
                 var user = new ApplicationUser()
                 {
-                    FirstName = RModel.FirstName,
-                    LastName = RModel.LastName,
-                    Gender = RModel.Gender,
-                    NRIC = RModel.NRIC,
+                    FirstName = EncryptionHelper.Encrypt(RModel.FirstName),
+                    LastName = EncryptionHelper.Encrypt(RModel.LastName),
+                    Gender = EncryptionHelper.Encrypt(RModel.Gender),
+                    NRIC = EncryptionHelper.Encrypt(RModel.NRIC),
                     UserName = RModel.Email,
                     Email = RModel.Email,
                     DateOfBirth = Convert.ToDateTime(RModel.DateOfBirth),
-                    WhoAmI = RModel.WhoAmI,
+                    WhoAmI = EncryptionHelper.Encrypt(RModel.WhoAmI),
                     Resume = resumeBytes,
                     ResumeFileName = RModel.Resume.FileName,
                     ResumeContentType = RModel.Resume.ContentType
@@ -62,7 +62,7 @@ namespace WebApplication1.Pages
                     ModelState.AddModelError("", error.Description);
                 }
 
-            }
+            }   
             return Page();
         }
 
