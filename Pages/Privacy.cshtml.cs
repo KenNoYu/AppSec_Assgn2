@@ -27,6 +27,15 @@ namespace WebApplication1.Pages
                 Response.Redirect("/Login");
                 return;
             }
+
+            var user = await _userManager.GetUserAsync(User);
+            // check if password expired
+            if ((DateTime.UtcNow - user.LastPasswordChange).TotalMinutes > 5)
+            {
+                TempData["PasswordExpired"] = "Your password has expired. Please change your password.";
+                Response.Redirect("/ChangePassword");
+                return;
+            }
         }
     }
 

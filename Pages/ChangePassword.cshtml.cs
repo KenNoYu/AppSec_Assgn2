@@ -45,10 +45,40 @@ namespace WebApplication1.Pages
                     return NotFound("User not found.");
                 }
 
+                // Validate password history (check last 2 passwords)
+                foreach (var oldPassword in user.PreviousPasswords.TakeLast(2))
+                {
+                    var result2 = _userManager.PasswordHasher.VerifyHashedPassword(user, oldPassword, Input.NewPassword);
+                    if (result2 == PasswordVerificationResult.Success)
+                    {
+                        ModelState.AddModelError(string.Empty, "You cannot reuse your last 2 passwords.");
+                        return Page();
+                    }
+                }
+
+                // Check minimum password age (e.g., prevent changing password more than once per day)
+                if ((DateTime.UtcNow - user.LastPasswordChange).TotalMinutes < 2)
+                {
+                    ModelState.AddModelError(string.Empty, "You can only change your password once every 2 minutes.");
+                    return Page();
+                }
+
+                // Store current password hash before changing
+                string oldPasswordHash = user.PasswordHash;
+
                 // Change password
                 var result = await _userManager.ChangePasswordAsync(user, Input.CurrentPassword, Input.NewPassword);
                 if (result.Succeeded)
                 {
+                    // Update password history and last password change time
+                    user.PreviousPasswords.Add(oldPasswordHash); // Store old password
+                    if (user.PreviousPasswords.Count > 2)
+                    {
+                        user.PreviousPasswords.RemoveAt(0); // Keep only last 2 passwords
+                    }
+                    user.LastPasswordChange = DateTime.UtcNow;
+
+                    await _userManager.UpdateAsync(user);
                     await _signInManager.RefreshSignInAsync(user);
                     return RedirectToPage("/Home");
                 }

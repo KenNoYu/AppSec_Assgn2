@@ -14,5 +14,7 @@ namespace WebApplication1.Model
         public string ResumeFileName { get; set; }
         public string ResumeContentType { get; set; }
         public string WhoAmI { get; set; }
+        public List<string> PreviousPasswords { get; set; } = new();
+        public DateTime LastPasswordChange { get; set; } = DateTime.UtcNow;
     }
 }

@@ -89,10 +89,18 @@ namespace WebApplication1.Pages
 
                     // Add the session to the tracker
                     _sessionTracker.AddSession(user.Id, HttpContext.Session.Id);
-                    await _auditLogService.LogActivityAsync(user.Id, "User logged in");
-                    await _userManager.ResetAccessFailedCountAsync(user);
+                    if ((DateTime.UtcNow - user.LastPasswordChange).TotalMinutes > 5)
+                    {
+                        TempData["PasswordExpired"] = "Your password has expired. Please change your password.";
+                        return RedirectToPage("/ChangePassword");
+                    }
+                    else
+                    {
+                        await _auditLogService.LogActivityAsync(user.Id, "User logged in");
+                        await _userManager.ResetAccessFailedCountAsync(user);
 
-                    return RedirectToPage("/Home");
+                        return RedirectToPage("/Home");
+                    }
                 }
                 else if (result.IsLockedOut)
                 {

@@ -38,6 +38,14 @@ namespace WebApplication1.Pages
             }
 
             var user = await _userManager.GetUserAsync(User);
+            // check if password expired
+            if ((DateTime.UtcNow - user.LastPasswordChange).TotalMinutes > 5)
+            {
+                TempData["PasswordExpired"] = "Your password has expired. Please change your password.";
+                Response.Redirect("/ChangePassword");
+                return;
+            }
+
             if (user != null)
             {
                 FirstName = EncryptionHelper.Decrypt(user.FirstName);
