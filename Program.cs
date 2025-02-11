@@ -49,6 +49,9 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizePage("/Privacy");
 });
 
+// recaptcha service
+builder.Services.AddHttpClient<ReCaptchaService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

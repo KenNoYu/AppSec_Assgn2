@@ -9,7 +9,7 @@
         <div class="col-sm-12 col-md-8 col-lg-6">
             <h1 class="mb-3">Login</h1>
 
-            <form method="post">
+            <form method="post" asp-antiforgery="true">
                 <div asp-validation-summary="All" class="text-danger"></div>
 
                 <!-- Email -->
@@ -32,6 +32,7 @@
                 </div>
 
                 <!-- Link to Register Page -->
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response" />
                 <div class="mb-3">
                     <p>Don't have an account? <a asp-page="/Register">Register here</a>.</p>
                 </div>
@@ -39,6 +40,22 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Recaptcha
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            grecaptcha.ready(function () {
+                grecaptcha.execute('6LemJdMqAAAAAM1drX5Zxhz0aMAJ8ItHpeRpZXe0', { action: 'submit' }).then(function (token) {
+                    document.getElementById("g-recaptcha-response").value = token;
+                    form.submit();
+                });
+            });
+        });
+    });
+</script>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

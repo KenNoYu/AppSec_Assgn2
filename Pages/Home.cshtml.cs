@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApplication1.Model;
+using System.Web;
 
 namespace WebApplication1.Pages
 {
@@ -31,6 +32,7 @@ namespace WebApplication1.Pages
             {
                 // Redirect to login page if session is expired
                 await _signInManager.SignOutAsync();
+                HttpContext.Session.Clear();
                 Response.Redirect("/Login");
                 return;
             }
@@ -44,7 +46,7 @@ namespace WebApplication1.Pages
                 NRIC = EncryptionHelper.Decrypt(user.NRIC);
                 Email = user.Email;
                 DateOfBirth = user.DateOfBirth.ToString("yyyy-MM-dd");
-                WhoAmI = EncryptionHelper.Decrypt(user.WhoAmI);
+                WhoAmI = HttpUtility.HtmlDecode(EncryptionHelper.Decrypt(user.WhoAmI));
             }
         }
     }

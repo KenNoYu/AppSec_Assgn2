@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebApplication1.ViewModels;
 using WebApplication1.Model;
+using System.Web;
 using System;
 
 namespace WebApplication1.Pages
@@ -11,13 +12,15 @@ namespace WebApplication1.Pages
     {
         private UserManager<ApplicationUser> userManager { get; }
         private SignInManager<ApplicationUser> signInManager { get; }
+        private readonly ReCaptchaService _reCaptchaService;
+
 
         [BindProperty]
         public Register RModel { get; set; }
 
-        public RegisterModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public RegisterModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ReCaptchaService reCaptchaService)
         {
-            this.userManager = userManager; this.signInManager = signInManager;
+            this.userManager = userManager; this.signInManager = signInManager; _reCaptchaService = reCaptchaService;
         }
 
         public void OnGet()
@@ -25,10 +28,20 @@ namespace WebApplication1.Pages
         }
 
         //Save data into the database
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
+                var reCaptchaToken = Request.Form["g-recaptcha-response"];
+                var isHuman = await _reCaptchaService.VerifyToken(reCaptchaToken);
+
+                if (!isHuman)
+                {
+                    ModelState.AddModelError(string.Empty, "reCAPTCHA validation failed. Please try again.");
+                    return Page();
+                }
+
                 if (RModel.Resume == null || RModel.Resume.Length == 0)
                 {
                     ModelState.AddModelError("RModel.Resume", "Resume is required.");
@@ -48,14 +61,14 @@ namespace WebApplication1.Pages
                     UserName = RModel.Email,
                     Email = RModel.Email,
                     DateOfBirth = Convert.ToDateTime(RModel.DateOfBirth),
-                    WhoAmI = EncryptionHelper.Encrypt(RModel.WhoAmI),
+                    WhoAmI = EncryptionHelper.Encrypt(HttpUtility.HtmlEncode(RModel.WhoAmI)),
                     Resume = resumeBytes,
                     ResumeFileName = RModel.Resume.FileName,
                     ResumeContentType = RModel.Resume.ContentType
                 };
                 var result = await userManager.CreateAsync(user, RModel.Password); if (result.Succeeded)
                 {
-                    await signInManager.SignInAsync(user, false); return RedirectToPage("Index");
+                    return RedirectToPage("/Login");
                 }
                 foreach (var error in result.Errors)
                 {

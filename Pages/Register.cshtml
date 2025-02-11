@@ -10,7 +10,7 @@
 		<div class="col-sm-12 col-md-12 col-lg-4">
 			<h1 class="mb-3">Register </h1>
 
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" enctype="multipart/form-data" asp-antiforgery="true">
 				<div asp-validation-summary="All" class="text-danger"></div>
 
 				<!-- First Name -->
@@ -91,6 +91,7 @@
                     <span asp-validation-for="RModel.WhoAmI" class="text-danger"></span>
                 </div>
 
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response" />
 				<div class="mb-3">
 					<button type="submit" class="btn btn-primary">Register</button>
 				</div>
@@ -112,7 +113,7 @@
         function calculatePasswordScore(password) {
             let score = 0;
 
-            if (password.length >= 8) score++; // Very Weak
+            if (password.length >= 12) score++; // Very Weak
             if (/[a-z]/.test(password)) score++; // Weak
             if (/[A-Z]/.test(password)) score++; // Medium
             if (/\d/.test(password)) score++; // Strong
@@ -181,6 +182,20 @@
                 e.preventDefault();
                 confirmPasswordFeedback.textContent = "Passwords do not match.";
             }
+        });
+    });
+
+    // Recaptcha
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            grecaptcha.ready(function () {
+                grecaptcha.execute('6LemJdMqAAAAAM1drX5Zxhz0aMAJ8ItHpeRpZXe0', { action: 'submit' }).then(function (token) {
+                    document.getElementById("g-recaptcha-response").value = token;
+                    form.submit();
+                });
+            });
         });
     });
 </script>

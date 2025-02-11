@@ -13,6 +13,7 @@ namespace WebApplication1.Pages
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AuditLogService _auditLogService;
         private readonly SessionTracker _sessionTracker;
+        private readonly ReCaptchaService _reCaptchaService;
 
         [BindProperty]
         public LoginInputModel Input { get; set; }
@@ -21,18 +22,30 @@ namespace WebApplication1.Pages
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             AuditLogService auditLogService,
-            SessionTracker sessionTracker)
+            SessionTracker sessionTracker,
+            ReCaptchaService reCaptchaService)
         {
             this._signInManager = signInManager;
             this._userManager = userManager;
             _auditLogService = auditLogService;
             _sessionTracker = sessionTracker;
+            _reCaptchaService = reCaptchaService;
         }
 
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPostAsync()
         {
             if (ModelState.IsValid)
             {
+                var reCaptchaToken = Request.Form["g-recaptcha-response"];
+                var isHuman = await _reCaptchaService.VerifyToken(reCaptchaToken);
+
+                if (!isHuman)
+                {
+                    ModelState.AddModelError(string.Empty, "reCAPTCHA validation failed. Please try again.");
+                    return Page();
+                }
+
                 var user = await _userManager.FindByEmailAsync(Input.Email);
 
                 if (user == null)

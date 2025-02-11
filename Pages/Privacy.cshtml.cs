@@ -22,6 +22,7 @@ namespace WebApplication1.Pages
             if (!HttpContext.Session.Keys.Contains("UserId"))
             {
                 await _signInManager.SignOutAsync();
+                HttpContext.Session.Clear();
                 // Redirect to login page if session is expired
                 Response.Redirect("/Login");
                 return;
