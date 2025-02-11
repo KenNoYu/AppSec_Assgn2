@@ -19,6 +19,16 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireNonAlphanumeric = true;  // Must have a special character (!@#$%^&)
     options.Password.RequiredLength = 8;             // Minimum length of 8 characters
     options.Password.RequiredUniqueChars = 1;
+
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // Lockout for 5 minutes
+    options.Lockout.MaxFailedAccessAttempts = 3; // Lock after 3 failed attempts
+    options.Lockout.AllowedForNewUsers = true;
+
+    options.User.RequireUniqueEmail = true; // Require unique email
+});
+builder.Services.Configure<PasswordHasherOptions>(options =>
+{
+    options.IterationCount = 10000; // Adjust hashing strength
 });
 
 // Add session configuration
@@ -27,14 +37,6 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(20); // Session timeout after 20 minutes
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-});
-
-// login lockout policy
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // Lockout for 5 minutes
-    options.Lockout.MaxFailedAccessAttempts = 3; // Lock after 3 failed attempts
-    options.Lockout.AllowedForNewUsers = true;
 });
 
 // audit log service

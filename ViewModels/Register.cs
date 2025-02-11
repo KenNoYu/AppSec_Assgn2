@@ -27,7 +27,7 @@ namespace WebApplication1.ViewModels
         [Required]
         [DataType(DataType.Password)]
         [RegularExpression(@"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{12,}$",
-        ErrorMessage = "Password must be at least 8 characters long, with at least one uppercase letter, one lowercase letter, one number, and one special character.")]
+        ErrorMessage = "Password must be at least 12 characters long, with at least one uppercase letter, one lowercase letter, one number, and one special character.")]
         public string Password { get; set; }
 
         [Required]
