@@ -9,11 +9,13 @@ namespace WebApplication1.Pages
     {
         private readonly ILogger<PrivacyModel> _logger;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public PrivacyModel(ILogger<PrivacyModel> logger, SignInManager<ApplicationUser> signInManager)
+        public PrivacyModel(ILogger<PrivacyModel> logger, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _signInManager = signInManager;
+            this._userManager = userManager;
         }
 
         public async Task OnGetAsync()

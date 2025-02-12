@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using WebApplication1;
 using WebApplication1.Model;
 
@@ -9,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<AuthDbContext>();
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AuthDbContext>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AuthDbContext>().AddDefaultTokenProviders(); ;
 // Password policy
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -51,6 +52,9 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizePage("/Privacy");
 });
 
+// email service
+builder.Services.AddTransient<IEmailService, SendGridEmailService>();
+
 // recaptcha service
 builder.Services.AddHttpClient<ReCaptchaService>();
 
@@ -64,6 +68,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseStatusCodePagesWithRedirects("/errors/{0}");
 app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();

@@ -29,20 +29,24 @@ namespace WebApplication1.Pages
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(Input.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+				System.Diagnostics.Debug.WriteLine($"{user}");
+				if (user == null)
                 {
-                    // Don't reveal that the user does not exist or is not confirmed
-                    return RedirectToPage("/ForgotPasswordConfirmation");
+					// Don't reveal that the user does not exist or is not confirmed
+					System.Diagnostics.Debug.WriteLine($"User don't exists");
+					return RedirectToPage("/ForgotPasswordConfirmation");
                 }
 
                 // Generate password reset token
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var callbackUrl = Url.Page("/ResetPassword", pageHandler: null, values: new { token, email = user.Email }, protocol: Request.Scheme);
+                var callbackUrl = Url.Page("/ChangeForgetPassword", pageHandler: null, values: new { token, email = user.Email }, protocol: Request.Scheme);
 
-                // Send email
-                await _emailService.SendEmailAsync(user.Email, "Reset Password", $"Please reset your password by <a href='{callbackUrl}'>clicking here</a>.");
+				// Send email
+				System.Diagnostics.Debug.WriteLine($"Sending Email");
+				await _emailService.SendEmailAsync("tanjy0206@gmail.com", "Reset Password", $"Please reset your password by <a href='{callbackUrl}'>clicking here</a>.");
 
-                return RedirectToPage("/ForgotPasswordConfirmation");
+
+				return RedirectToPage("/ForgotPasswordConfirmation");
             }
             return Page();
         }
