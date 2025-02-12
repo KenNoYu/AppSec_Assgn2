@@ -45,7 +45,8 @@ namespace WebApplication1.Pages
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
