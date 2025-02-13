@@ -10,9 +10,7 @@ namespace WebApplication1.Model
         public string Gender { get; set; }
         public string NRIC { get; set; }
         public DateTime DateOfBirth { get; set; }
-        public byte[] Resume { get; set; }
-        public string ResumeFileName { get; set; }
-        public string ResumeContentType { get; set; }
+        public string? ResumePath {  get; set; }
         public string WhoAmI { get; set; }
         public List<string> PreviousPasswords { get; set; } = new();
         public DateTime LastPasswordChange { get; set; } = DateTime.UtcNow;

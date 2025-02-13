@@ -13,14 +13,22 @@ namespace WebApplication1.Pages
         private UserManager<ApplicationUser> userManager { get; }
         private SignInManager<ApplicationUser> signInManager { get; }
         private readonly ReCaptchaService _reCaptchaService;
+        private readonly IWebHostEnvironment _environment;
 
 
         [BindProperty]
         public Register RModel { get; set; }
 
-        public RegisterModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ReCaptchaService reCaptchaService)
+        public RegisterModel
+            (UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager, 
+            ReCaptchaService reCaptchaService,
+            IWebHostEnvironment environment)
         {
-            this.userManager = userManager; this.signInManager = signInManager; _reCaptchaService = reCaptchaService;
+            this.userManager = userManager; 
+            this.signInManager = signInManager; 
+            _reCaptchaService = reCaptchaService;
+            _environment = environment;
         }
 
         public void OnGet()
@@ -42,15 +50,11 @@ namespace WebApplication1.Pages
                     return Page();
                 }
 
-                if (RModel.Resume == null || RModel.Resume.Length == 0)
+                if (RModel.ResumePath == null || RModel.ResumePath.Length == 0)
                 {
                     ModelState.AddModelError("RModel.Resume", "Resume is required.");
                     return Page();
                 }
-
-                using var memoryStream = new MemoryStream();
-                await RModel.Resume.CopyToAsync(memoryStream);
-                byte[] resumeBytes = memoryStream.ToArray(); // Convert IFormFile to byte[]
 
                 var user = new ApplicationUser()
                 {
@@ -62,13 +66,33 @@ namespace WebApplication1.Pages
                     Email = RModel.Email,
                     DateOfBirth = Convert.ToDateTime(RModel.DateOfBirth),
                     WhoAmI = EncryptionHelper.Encrypt(HttpUtility.HtmlEncode(RModel.WhoAmI)),
-                    Resume = resumeBytes,
-                    ResumeFileName = RModel.Resume.FileName,
-                    ResumeContentType = RModel.Resume.ContentType
                 };
-                var result = await userManager.CreateAsync(user, RModel.Password); if (result.Succeeded)
+                var result = await userManager.CreateAsync(user, RModel.Password); 
+                if (result.Succeeded)
                 {
-                    return RedirectToPage("/Login");
+					var allowedExtensions = new[] { ".pdf", ".docx" };
+					var extension = Path.GetExtension(RModel.ResumePath.FileName).ToLower();
+
+					if (!allowedExtensions.Contains(extension))
+					{
+						ModelState.AddModelError("", "Only .pdf and .docx files are allowed");
+						return Page();
+					}
+
+					var uploadsFolder = Path.Combine(_environment.WebRootPath, "Resume");
+					Directory.CreateDirectory(uploadsFolder);
+					var uniqueFileName = Guid.NewGuid().ToString() + extension;
+					var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+					using (var fileStream = new FileStream(filePath, FileMode.Create))
+					{
+						await RModel.ResumePath.CopyToAsync(fileStream);
+					}
+
+                    user.ResumePath = "/resumes/" + uniqueFileName;
+                    await userManager.UpdateAsync(user);
+
+					return RedirectToPage("/Login");
                 }
                 foreach (var error in result.Errors)
                 {

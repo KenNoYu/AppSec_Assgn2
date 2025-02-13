@@ -37,7 +37,10 @@ namespace WebApplication1.ViewModels
 
         [Required][DataType(DataType.Date)] public string DateOfBirth { get; set; }
 
-        [Required][DataType(DataType.Upload)]public IFormFile Resume { get; set; }
+        [Required]
+        [DataType(DataType.Upload)]
+        [AllowedExtensions(new string[] { ".pdf", ".docx" })]
+        public IFormFile ResumePath { get; set; }
 
         [Required]
         [StringLength(500, ErrorMessage = "WhoAmI section must be under 500 characters.")]

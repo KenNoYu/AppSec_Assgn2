@@ -18,6 +18,7 @@ namespace WebApplication1.Pages
         public string Email { get; private set; }
         public string DateOfBirth { get; private set; }
         public string WhoAmI { get; private set; }
+        public string ResumePath { get; private set; }
 
         public HomeModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
@@ -55,6 +56,7 @@ namespace WebApplication1.Pages
                 Email = user.Email;
                 DateOfBirth = user.DateOfBirth.ToString("yyyy-MM-dd");
                 WhoAmI = HttpUtility.HtmlDecode(EncryptionHelper.Decrypt(user.WhoAmI));
+                ResumePath = user.ResumePath;
             }
         }
     }
